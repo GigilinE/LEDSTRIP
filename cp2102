@@ -46,7 +46,11 @@ ota:
   password: "e9f17baae6503d6427f99aafd5c68ac3"
 
 globals:
-  - id: effect_in_progress
+  - id: lit_leds
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: effect_completed
     type: bool
     restore_value: no
     initial_value: 'false'
@@ -65,30 +69,23 @@ light:
     id: led_strip
     name: "LED Strip"
     effects:
-      - addressable_lambda:
-          name: Effetto di Caricamento
-          update_interval: 50ms
-          lambda: |-
-            static int lit_leds = 0;
-            if (lit_leds == 0) {
-              id(effect_in_progress) = true;
-            }
-            if (!id(led_strip).state.is_on()) {
-              it.all() = light::ESPColor::BLACK;
-              lit_leds = 0;
-              id(effect_in_progress) = false;
-            } else if (lit_leds < it.size()) {
-              it[lit_leds++] = light::ESPColor::WHITE;
-            } 
-            on_turn_on:
-              then:
-                if:
-                  condition:
-                    not:
-                      global.value: effect_in_progress
-                  then:
-                    - light.turn_off: led_strip
-                    - delay: 500ms
-                    - light.turn_on:
-                        id: led_strip
-                        effect: "Effetto di Caricamento"
+      - addressable_color_wipe:
+          name: Onda on
+          colors:
+            - red: 100%
+              green: 100%
+              blue: 100%
+              white: 100%
+              num_leds: 420
+          add_led_interval: 50ms
+          reverse: false
+      - addressable_color_wipe:
+          name: Onda off
+          colors:
+            - red: 100%
+              green: 100%
+              blue: 100%
+              white: 100%
+              num_leds: 420
+          add_led_interval: 50ms
+          reverse: true
